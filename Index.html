@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Deploy a Remix Contract</title>
+
+    <link rel="stylesheet" type="text/css" href="main.css">
+
+    <script src="./node_modules/web3/dist/web3.min.js"></script>
+</head>
+
+<body>
+    <div>
+        <h1>Ethereum Secret Messenger</h1>
+        <hr>
+
+        <label for="message">This site writes a secret message to the Ethereum
+            blockchain!</label>
+        <input id="userInput" type="text">
+
+        <button id="setMessageButton">Set secret message</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+     <!-- script src="https://unpkg.com/@metamask/detect-provider/dist/detect-provider.min.js"></script -->
+
+    <script src="https://github.com/ethereumjs/browser-builds/blob/master/dist/ethereumjs-tx/ethereumjs-tx-1.3.3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/ethereumjs/browser-builds/dist/ethereumjs-tx/ethereumjs-tx-1.3.3.min.js"></script>
+
+    
+
+    <script>
+        //const Tx = require('ethereumjs-tx');
+
+    /*    const ethEnabled = () => {
+            if (window.web3) {
+                window.web3 = new Web3(window.web3.currentProvider);
+                window.ethereum.enable();
+                return true;
+            } else {
+                web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/2a86bf13256f4416b08597ba26841646"));
+            };
+            // return false;
+        };  */
+
+        // Connect a the web3 provider
+        if (typeof web3 !== 'undefined') {
+            web3 = new Web3(web3.currentProvider);
+        } else {
+            web3 = new Web3(new Web3.providers.HttpProvider("https://rinkeby.infura.io/v3/2a86bf13256f4416b08597ba26841646"));
+        } 
+
+        // Set a default account
+        //web3.eth.defaultAccount = web3.eth.accounts[0];
+
+        tempweb3 = web3
+		web3.eth.getAccounts().then(f => {
+  		tempweb3.eth.defaultAccount = f[0];
+		});  
+
+        // Get the contract address
+        var RemixContract = [
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "x",
+				"type": "string"
+			}
+		],
+		"name": "setMessage",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getMessage",
+		"outputs": [
+			{
+				"name": "",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	}
+];
+
+        // Get smart contract address
+        var contractAddress = "0x4588058CAb903f8f2C81734b648161039AcC033B"
+
+        // Get the contract abi
+        var myMessage = new web3.eth.Contract(RemixContract, contractAddress);
+
+        console.log(myMessage);
+
+ /*       $("#setMessageButton").click(function () {
+            myMessage.setMessage($("#userInput").val());
+            console.log($("#userInput").val())
+        });  
+
+*/
+
+        const account1 = "0x54195Bf668E4dD5131eC5aFd9a22cFa2932dA330";
+        const privateKey1 = new ethereumjs.Buffer.Buffer('34e946b3ce7e1ca0cc7d5865e11bf91ec4a63a82d385da92e884fd03d0d2cbd1', 'hex');
+
+       // with `querySelector` you can also query classes, it is similar to the `$` function
+        let button = document.querySelector("#setMessageButton");
+        let input = document.querySelector("#userInput");
+        button.addEventListener("click", function() { 
+            console.log(input.value);
+
+            const myData = myMessage.methods.setMessage(input.value).encodeABI();
+            let accountMeta = tempweb3;
+            //let privateMeta = 
+
+            web3.eth.getTransactionCount(account1, (err, txCount) => {
+                //build the transaction
+                const txObject = {
+                    nonce: web3.utils.toHex(txCount),
+                    to: contractAddress,
+                    value:    web3.utils.toHex(web3.utils.toWei('0', 'ether')),
+                    gasLimit: web3.utils.toHex(2100000),
+                    gasPrice: web3.utils.toHex(web3.utils.toWei('6', 'gwei')),
+                    data: myData 
+                };
+            
+                const tx = new ethereumjs.Tx(txObject);
+                tx.sign(privateKey1);
+
+                const serializedTx = tx.serialize();
+                const raw = '0x' + serializedTx.toString('hex');
+
+                const transaction = web3.eth.sendSignedTransaction(raw, (err, tx)=>{
+                console.log(tx);
+                });
+            });
+        }); 
+    </script>
+</body>
+
+</html>

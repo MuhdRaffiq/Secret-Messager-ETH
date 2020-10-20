@@ -1,0 +1,15 @@
+var RemixContract = [{"constant":false,
+"inputs":[{"name":"_greeting","type":"string"}],
+"name":"greet",
+"outputs":[],
+"payable":false,
+"stateMutability":"nonpayable",
+"type":"function"},
+
+{"constant":true,
+"inputs":[],
+"name":"getGreeting",
+"outputs":[{"name":"","type":"string"}],
+"payable":false,
+"stateMutability":"view",
+"type":"function"}]
